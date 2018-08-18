@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AppOffline</string>
+    <string name="search">Buscar</string>
+    <string name="github_user">Github User</string>
+</resources>
