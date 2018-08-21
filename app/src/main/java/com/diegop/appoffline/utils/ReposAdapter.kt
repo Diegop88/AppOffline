@@ -10,7 +10,7 @@ import com.diegop.appoffline.R
 import com.diegop.appoffline.domain.model.Repo
 import kotlinx.android.synthetic.main.item_repo.view.*
 
-class ReposAdapter(private val listener: OnRepoClickListener) : ListAdapter<Repo, ReposAdapter.RepoViewHolder>(RepoDiff()) {
+class ReposAdapter(private val onClick: (Repo) -> Unit) : ListAdapter<Repo, ReposAdapter.RepoViewHolder>(RepoDiff()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             RepoViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_repo, parent, false))
@@ -19,7 +19,7 @@ class ReposAdapter(private val listener: OnRepoClickListener) : ListAdapter<Repo
 
     inner class RepoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun bind(repo: Repo) {
-            itemView.setOnClickListener { listener.onRepoClick(repo) }
+            itemView.setOnClickListener { onClick(repo) }
             itemView.repoName.text = repo.name
             itemView.repoDescription.text = repo.description
         }
@@ -28,9 +28,5 @@ class ReposAdapter(private val listener: OnRepoClickListener) : ListAdapter<Repo
     class RepoDiff : DiffUtil.ItemCallback<Repo>() {
         override fun areItemsTheSame(oldItem: Repo?, newItem: Repo?) = oldItem?.name == newItem?.name
         override fun areContentsTheSame(oldItem: Repo?, newItem: Repo?) = oldItem == newItem
-    }
-
-    interface OnRepoClickListener {
-        fun onRepoClick(repo: Repo)
     }
 }
