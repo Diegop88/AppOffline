@@ -1,11 +1,11 @@
 package com.diegop.appoffline.utils
 
-import android.support.v7.recyclerview.extensions.ListAdapter
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.diegop.appoffline.R
 import com.diegop.appoffline.domain.model.Repo
 import kotlinx.android.synthetic.main.item_repo.view.*
@@ -26,7 +26,7 @@ class ReposAdapter(private val onClick: (Repo) -> Unit) : ListAdapter<Repo, Repo
     }
 
     class RepoDiff : DiffUtil.ItemCallback<Repo>() {
-        override fun areItemsTheSame(oldItem: Repo?, newItem: Repo?) = oldItem?.name == newItem?.name
-        override fun areContentsTheSame(oldItem: Repo?, newItem: Repo?) = oldItem == newItem
+        override fun areItemsTheSame(oldItem: Repo, newItem: Repo) = oldItem.name == newItem.name
+        override fun areContentsTheSame(oldItem: Repo, newItem: Repo) = oldItem == newItem
     }
 }

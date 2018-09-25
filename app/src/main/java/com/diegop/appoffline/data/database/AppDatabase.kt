@@ -1,7 +1,7 @@
 package com.diegop.appoffline.data.database
 
-import android.arch.persistence.room.Database
-import android.arch.persistence.room.RoomDatabase
+import androidx.room.Database
+import androidx.room.RoomDatabase
 import com.diegop.appoffline.data.database.entities.DBIssue
 import com.diegop.appoffline.data.database.entities.DBRepo
 

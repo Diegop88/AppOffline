@@ -1,7 +1,7 @@
 package com.diegop.appoffline.di
 
 import android.app.Application
-import android.arch.persistence.room.Room
+import androidx.room.Room
 import com.diegop.appoffline.data.database.AppDao
 import com.diegop.appoffline.data.database.AppDatabase
 import com.diegop.appoffline.data.network.ApiService

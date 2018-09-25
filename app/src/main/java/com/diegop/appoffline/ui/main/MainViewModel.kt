@@ -1,9 +1,8 @@
 package com.diegop.appoffline.ui.main
 
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
-import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.diegop.appoffline.domain.model.Repo
 import com.diegop.appoffline.domain.usecase.repo.GetReposByUser
 import com.diegop.appoffline.utils.Status
@@ -21,7 +20,8 @@ class MainViewModel(private val getReposByUser: GetReposByUser) : ViewModel() {
                     errorData.value = it.message
                     userData.value = it.data
                 }
-                Status.LOADING -> { }
+                Status.LOADING -> {
+                }
             }
         }
     }

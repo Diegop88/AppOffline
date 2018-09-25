@@ -1,7 +1,7 @@
 package com.diegop.appoffline.utils
 
-import android.support.annotation.MainThread
-import android.support.annotation.WorkerThread
+import androidx.annotation.MainThread
+import androidx.annotation.WorkerThread
 import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter

@@ -1,8 +1,8 @@
 package com.diegop.appoffline.ui.detail
 
-import android.arch.lifecycle.MutableLiveData
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.diegop.appoffline.domain.model.Issue
 import com.diegop.appoffline.domain.usecase.issue.GetIssuesByRepo
 import com.diegop.appoffline.utils.Status

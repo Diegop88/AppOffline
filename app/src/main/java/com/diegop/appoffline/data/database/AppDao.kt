@@ -1,9 +1,9 @@
 package com.diegop.appoffline.data.database
 
-import android.arch.persistence.room.Dao
-import android.arch.persistence.room.Insert
-import android.arch.persistence.room.OnConflictStrategy.REPLACE
-import android.arch.persistence.room.Query
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy.REPLACE
+import androidx.room.Query
 import com.diegop.appoffline.data.database.entities.DBIssue
 import com.diegop.appoffline.data.database.entities.DBRepo
 
