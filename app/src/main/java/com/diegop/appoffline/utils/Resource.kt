@@ -1,9 +1,7 @@
 package com.diegop.appoffline.utils
 
-class Resource<T>(val status: Status, val data: T?, val message: String?) {
-    companion object {
-        fun <T> success(data: T?) = Resource(Status.SUCCESS, data, null)
-        fun <T> loading(data: T?) = Resource(Status.LOADING, data, null)
-        fun <T> error(message: String?, data: T?) = Resource(Status.ERROR, data, message)
-    }
+sealed class Resource<T> {
+    class Success<T>(val data: T?) : Resource<T>()
+    class Loading<T>(val data: T?) : Resource<T>()
+    class Error<T>(val message: String, val data: T?) : Resource<T>()
 }

@@ -29,12 +29,12 @@ class AppRepository(private val dao: AppDao, private val api: ApiService, privat
         override fun createCall() = when (networkHandler.isConnected) {
             true -> api.getRepos(user).execute().let {
                 if (it.isSuccessful) {
-                    Resource.success(it.body())
+                    Resource.Success(it.body())
                 } else {
-                    Resource.error(it.message(), null)
+                    Resource.Error(it.message(), null)
                 }
             }
-            false, null -> Resource.error("No network detected", null)
+            false, null -> Resource.Error("No network detected", null)
         }
 
         override fun onFetchFailed() {
@@ -57,14 +57,13 @@ class AppRepository(private val dao: AppDao, private val api: ApiService, privat
         override fun createCall() = when (networkHandler.isConnected) {
             true -> api.getIssues(user, repo).execute().run {
                 if (isSuccessful) {
-                    Resource.success(body())
+                    Resource.Success(body())
                 } else {
-                    Resource.error(message(), null)
+                    Resource.Error(message(), null)
                 }
             }
-            false, null -> Resource.error("No network detected", null)
+            false, null -> Resource.Error("No network detected", null)
         }
-
     }.asObservable()
 
     fun EntityRepo.toDBRepo() = DBRepo(this.name, this.user.name, this.description)

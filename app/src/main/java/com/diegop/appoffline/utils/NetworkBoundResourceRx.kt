@@ -1,8 +1,8 @@
 package com.diegop.appoffline.utils
 
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
-import android.util.Log
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -14,12 +14,12 @@ abstract class NetworkBoundResourceRx<ResultType, RequestType> @MainThread prote
 
     init {
         result = Observable.create { result ->
-            result.onNext(Resource.loading(null))
+            result.onNext(Resource.Loading(null))
             val data = loadFromDb()
             if (shouldFetch(data)) {
                 fetchFromNetwork(result, data)
             } else {
-                result.onNext(Resource.success(data))
+                result.onNext(Resource.Success(data))
                 result.onComplete()
             }
         }
@@ -27,19 +27,19 @@ abstract class NetworkBoundResourceRx<ResultType, RequestType> @MainThread prote
 
     private fun fetchFromNetwork(result: ObservableEmitter<Resource<ResultType>>, data: ResultType) {
         val resource = createCall()
-        when (resource.status) {
-            Status.SUCCESS -> {
+        when (resource) {
+            is Resource.Success -> {
                 saveCallResult(resource.data)
                 val newData = loadFromDb()
-                result.onNext(Resource.success(newData))
+                result.onNext(Resource.Success(newData))
                 result.onComplete()
             }
-            Status.ERROR -> {
+            is Resource.Error -> {
                 onFetchFailed()
-                result.onNext(Resource.error(resource.message, data))
+                result.onNext(Resource.Error(resource.message, data))
                 result.onComplete()
             }
-            Status.LOADING -> result.onNext(Resource.loading(data))
+            is Resource.Loading -> result.onNext(Resource.Loading(data))
         }
     }
 
