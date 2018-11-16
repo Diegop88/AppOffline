@@ -6,7 +6,7 @@ import com.diegop.appoffline.data.database.AppDao
 import com.diegop.appoffline.data.database.AppDatabase
 import com.diegop.appoffline.data.network.ApiService
 import com.diegop.appoffline.data.repository.AppRepository
-import com.diegop.appoffline.utils.NetworkHandler
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -27,6 +27,7 @@ class AppModule {
 
         return Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .baseUrl("https://api.github.com/")
                 .client(client)
                 .build()
@@ -44,9 +45,5 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideNetworkHandler(application: Application) = NetworkHandler(application)
-
-    @Provides
-    @Singleton
-    fun provideAppRepository(dao: AppDao, api: ApiService, networkHandler: NetworkHandler) = AppRepository(dao, api, networkHandler)
+    fun provideAppRepository(dao: AppDao, api: ApiService) = AppRepository(dao, api)
 }

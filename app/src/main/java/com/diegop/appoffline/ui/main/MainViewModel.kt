@@ -7,7 +7,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.diegop.appoffline.domain.model.Repo
 import com.diegop.appoffline.domain.usecase.repo.GetReposByUser
 import com.diegop.appoffline.utils.Resource
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(private val getReposByUser: GetReposByUser) : ViewModel() {
 
@@ -19,22 +22,17 @@ class MainViewModel(private val getReposByUser: GetReposByUser) : ViewModel() {
     val errorData: LiveData<String>
         get() = _errorData
 
-    private val compositeDisposable = CompositeDisposable()
-
-    fun getRepo(user: String) = compositeDisposable.add(getReposByUser.getReposByUser(user).subscribe {
-        when (it) {
-            is Resource.Success -> _userData.value = it.data
-            is Resource.Error -> {
-                _errorData.value = it.message
-                _userData.value = it.data
+    fun getRepo(user: String) = GlobalScope.launch(Dispatchers.IO) {
+        val response = getReposByUser(user)
+        withContext(Dispatchers.Main) {
+            when (response) {
+                is Resource.Success -> _userData.value = response.data
+                is Resource.Error -> {
+                    _errorData.value = response.error.message
+                    _userData.value = response.data
+                }
             }
-            is Resource.Loading -> Unit
         }
-    })
-
-    override fun onCleared() {
-        compositeDisposable.dispose()
-        super.onCleared()
     }
 
     @Suppress("UNCHECKED_CAST")

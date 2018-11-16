@@ -7,7 +7,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.diegop.appoffline.domain.model.Issue
 import com.diegop.appoffline.domain.usecase.issue.GetIssuesByRepo
 import com.diegop.appoffline.utils.Resource
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DetailViewModel(private val getIssuesByRepo: GetIssuesByRepo) : ViewModel() {
 
@@ -19,22 +22,17 @@ class DetailViewModel(private val getIssuesByRepo: GetIssuesByRepo) : ViewModel(
     val errorData: LiveData<String>
         get() = _errorData
 
-    private val compositeDisposable = CompositeDisposable()
-
-    fun getIssues(user: String, repo: String) = compositeDisposable.add(getIssuesByRepo.getIssues(user, repo).subscribe {
-        when (it) {
-            is Resource.Success -> _issuesData.value = it.data
-            is Resource.Error -> {
-                _errorData.value = it.message
-                _issuesData.value = it.data
+    fun getIssues(user: String, repo: String) = GlobalScope.launch(Dispatchers.IO) {
+        val result = getIssuesByRepo(user, repo)
+        withContext(Dispatchers.Main) {
+            when (result) {
+                is Resource.Success -> _issuesData.value = result.data
+                is Resource.Error -> {
+                    _errorData.value = result.error.message
+                    _issuesData.value = result.data
+                }
             }
-            is Resource.Loading -> Unit
         }
-    })
-
-    override fun onCleared() {
-        compositeDisposable.dispose()
-        super.onCleared()
     }
 
     @Suppress("UNCHECKED_CAST")

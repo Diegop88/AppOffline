@@ -1,63 +1,58 @@
 package com.diegop.appoffline.utils
 
 import android.util.Log
-import androidx.annotation.MainThread
-import androidx.annotation.WorkerThread
-import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import retrofit2.Response
+import java.io.IOException
 
-abstract class NetworkBoundResourceRx<ResultType, RequestType> @MainThread protected constructor() {
+abstract class NetworkBoundResourceRx<ResultType : Any, RequestType : Any> {
 
-    private val result: Observable<Resource<ResultType>>
-
-    init {
-        result = Observable.create { result ->
-            result.onNext(Resource.Loading(null))
-            val data = loadFromDb()
-            if (shouldFetch(data)) {
-                fetchFromNetwork(result, data)
-            } else {
-                result.onNext(Resource.Success(data))
-                result.onComplete()
+    suspend operator fun invoke(): Resource<ResultType> {
+        val local = loadFromDb()
+        return if (shouldFetch(local)) {
+            val requestData = safeApiCall(call = { fetchFromNetwork() }, errorMessage = "Failed to retrieve from API")
+            return when (requestData) {
+                is Resource.Success -> {
+                    saveCallResult(requestData.data)
+                    Resource.Success(loadFromDb())
+                }
+                is Resource.Error -> {
+                    onFetchFailed(requestData.error)
+                    Resource.Error(requestData.error, local)
+                }
             }
+        } else {
+            Resource.Success(local)
         }
     }
 
-    private fun fetchFromNetwork(result: ObservableEmitter<Resource<ResultType>>, data: ResultType) {
-        val resource = createCall()
-        when (resource) {
-            is Resource.Success -> {
-                saveCallResult(resource.data)
-                val newData = loadFromDb()
-                result.onNext(Resource.Success(newData))
-                result.onComplete()
+    private suspend fun fetchFromNetwork(): Resource<RequestType> {
+        val response = createCall()
+        if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) {
+                return Resource.Success(data = body)
             }
-            is Resource.Error -> {
-                onFetchFailed()
-                result.onNext(Resource.Error(resource.message, data))
-                result.onComplete()
-            }
-            is Resource.Loading -> result.onNext(Resource.Loading(data))
+        }
+        return Resource.Error(error = IOException("Failed to retrieve from API"), data = null)
+    }
+
+    private suspend fun <T : Any> safeApiCall(call: suspend () -> Resource<T>, errorMessage: String): Resource<T> {
+        return try {
+            call()
+        } catch (e: Exception) {
+            Resource.Error(IOException(errorMessage, e), null)
         }
     }
 
-    protected open fun onFetchFailed() {
-        Log.e("NetworkBound", "Fetch failed")
+    protected open fun onFetchFailed(error: Exception) {
+        Log.e("NetworkBound", "Fetch failed ${error.message}")
     }
 
-    fun asObservable(): Observable<Resource<ResultType>> = result.observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.newThread())
+    protected abstract suspend fun loadFromDb(): ResultType
 
-    @WorkerThread
-    protected abstract fun saveCallResult(data: RequestType?)
-
-    @MainThread
-    protected abstract fun loadFromDb(): ResultType
-
-    @MainThread
     protected abstract fun shouldFetch(data: ResultType?): Boolean
 
-    @MainThread
-    protected abstract fun createCall(): Resource<out RequestType>
+    protected abstract suspend fun createCall(): Response<RequestType>
+
+    protected abstract suspend fun saveCallResult(data: RequestType?)
 }
