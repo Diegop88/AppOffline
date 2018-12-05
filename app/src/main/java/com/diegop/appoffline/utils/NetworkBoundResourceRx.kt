@@ -19,7 +19,7 @@ abstract class NetworkBoundResourceRx<ResultType : Any, RequestType : Any> {
                     onFetchFailed(requestData.error)
                     Resource.Error(requestData.error, local)
                 }
-            }
+            }.exhaustive
         } else {
             Resource.Success(local)
         }
@@ -33,7 +33,7 @@ abstract class NetworkBoundResourceRx<ResultType : Any, RequestType : Any> {
                 return Resource.Success(data = body)
             }
         }
-        return Resource.Error(error = IOException("Failed to retrieve from API"), data = null)
+        return Resource.Error(error = IOException("Failed to retrieve from API ${response.code()} ${response.message()}"), data = null)
     }
 
     private suspend fun <T : Any> safeApiCall(call: suspend () -> Resource<T>, errorMessage: String): Resource<T> {

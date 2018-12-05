@@ -7,10 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.diegop.appoffline.domain.model.Repo
 import com.diegop.appoffline.domain.usecase.repo.GetReposByUser
 import com.diegop.appoffline.utils.Resource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.diegop.appoffline.utils.exhaustive
+import kotlinx.coroutines.*
 
 class MainViewModel(private val getReposByUser: GetReposByUser) : ViewModel() {
 
@@ -22,6 +20,8 @@ class MainViewModel(private val getReposByUser: GetReposByUser) : ViewModel() {
     val errorData: LiveData<String>
         get() = _errorData
 
+    private var job: Job? = null
+
     fun getRepo(user: String) = GlobalScope.launch(Dispatchers.IO) {
         val response = getReposByUser(user)
         withContext(Dispatchers.Main) {
@@ -31,8 +31,13 @@ class MainViewModel(private val getReposByUser: GetReposByUser) : ViewModel() {
                     _errorData.value = response.error.message
                     _userData.value = response.data
                 }
-            }
+            }.exhaustive
         }
+    }.let { job = it }
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
     }
 
     @Suppress("UNCHECKED_CAST")

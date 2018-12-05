@@ -7,10 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.diegop.appoffline.domain.model.Issue
 import com.diegop.appoffline.domain.usecase.issue.GetIssuesByRepo
 import com.diegop.appoffline.utils.Resource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.diegop.appoffline.utils.exhaustive
+import kotlinx.coroutines.*
 
 class DetailViewModel(private val getIssuesByRepo: GetIssuesByRepo) : ViewModel() {
 
@@ -22,6 +20,8 @@ class DetailViewModel(private val getIssuesByRepo: GetIssuesByRepo) : ViewModel(
     val errorData: LiveData<String>
         get() = _errorData
 
+    private var job: Job? = null
+
     fun getIssues(user: String, repo: String) = GlobalScope.launch(Dispatchers.IO) {
         val result = getIssuesByRepo(user, repo)
         withContext(Dispatchers.Main) {
@@ -31,8 +31,13 @@ class DetailViewModel(private val getIssuesByRepo: GetIssuesByRepo) : ViewModel(
                     _errorData.value = result.error.message
                     _issuesData.value = result.data
                 }
-            }
+            }.exhaustive
         }
+    }.let { job = it }
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
     }
 
     @Suppress("UNCHECKED_CAST")
